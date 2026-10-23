@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="FeatureFlags.Api/FeatureFlags.Api.csproj" />
+  <Project Path="FeatureFlags.Maui/FeatureFlags.Maui.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+</Solution>

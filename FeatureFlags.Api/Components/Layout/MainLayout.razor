@@ -1,0 +1,25 @@
+﻿@inherits LayoutComponentBase
+
+<header class="topbar">
+    <a href="" class="brand">Feature Flags</a>
+    <nav>
+        <a href="flags">Flags</a>
+        <a href="api/flags" target="_blank">JSON</a>
+ 
+        @* AuthorizeView muestra algo distinto si hay sesión o no *@
+        <AuthorizeView>
+            <Authorized>
+                <span class="user">@context.User.Identity?.Name</span>
+                <a href="/auth/logout" data-enhance-nav="false">Salir</a>
+            </Authorized>
+            <NotAuthorized>
+                <a href="login">Entrar</a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </nav>
+</header>
+ 
+@* Aquí se dibuja la página actual *@
+<main class="container">
+    @Body
+</main>

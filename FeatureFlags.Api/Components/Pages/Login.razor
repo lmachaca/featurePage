@@ -1,0 +1,32 @@
+﻿@page "/login"
+<PageTitle>Entrar</PageTitle>
+ 
+<div class="card login">
+    <h1>Admin</h1>
+ 
+    @* Si el endpoint nos regresó con ?error=1, mostramos el mensaje *@
+    @if (Error is not null)
+    {
+        <p class="error">Usuario o contraseña incorrectos.</p>
+    }
+ 
+    @* El formulario se envía al endpoint /auth/login de Program.cs *@
+    <form method="post" action="/auth/login">
+        @* Token obligatorio: prueba que el formulario salió de nuestro sitio *@
+        <AntiforgeryToken />
+        @* A dónde regresar después de entrar *@
+        <input type="hidden" name="returnUrl" value="@ReturnUrl" />
+ 
+        @* El atributo name debe coincidir con los parámetros del endpoint *@
+        <label>Usuario <input name="usuario" required /></label>
+        <label>Contraseña <input name="password" type="password" required /></label>
+ 
+        <button class="btn">Entrar</button>
+    </form>
+</div>
+ 
+@code {
+    // Blazor llena estas propiedades con los valores de la URL (?error=1&ReturnUrl=/flags)
+    [SupplyParameterFromQuery] public string? Error { get; set; }
+    [SupplyParameterFromQuery] public string? ReturnUrl { get; set; }
+}

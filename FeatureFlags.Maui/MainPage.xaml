@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FeatureFlags.Maui.ViewModels"
+             x:Class="FeatureFlags.Maui.MainPage"
+             x:DataType="vm:MainViewModel"
+             Title="Ajustes">
+
+    <VerticalStackLayout Padding="24" Spacing="16">
+
+        <!-- Muestra la propiedad Estado del ViewModel -->
+        <Label Text="{Binding Estado}" />
+
+        <!-- Al pulsar, ejecuta LoadAsync() del ViewModel -->
+        <Button Text="Recargar flags" Command="{Binding LoadCommand}" />
+
+        <!-- Gira mientras LoadAsync() está corriendo -->
+        <ActivityIndicator IsRunning="{Binding LoadCommand.IsRunning}" />
+
+        <!-- IsVisible enlazado al flag: AQUÍ está el control desde Blazor -->
+        <HorizontalStackLayout IsVisible="{Binding ShowNotificaciones}" Spacing="12">
+            <Switch />
+            <Label Text="Notificaciones" VerticalOptions="Center" />
+        </HorizontalStackLayout>
+
+        <HorizontalStackLayout IsVisible="{Binding ShowModoOscuro}" Spacing="12">
+            <!-- Este switch además cambia el tema (ModoOscuroOn) -->
+            <Switch IsToggled="{Binding ModoOscuroOn}" />
+            <Label Text="Modo oscuro" VerticalOptions="Center" />
+        </HorizontalStackLayout>
+
+        <HorizontalStackLayout IsVisible="{Binding ShowUbicacion}" Spacing="12">
+            <Switch />
+            <Label Text="Ubicación" VerticalOptions="Center" />
+        </HorizontalStackLayout>
+
+    </VerticalStackLayout>
+</ContentPage>

@@ -1,0 +1,93 @@
+﻿@page "/flags"
+@using FeatureFlags.Api.Data
+@rendermode InteractiveServer
+@attribute [Authorize]
+@inject AppDbContext Db
+
+<PageTitle>Administrar flags</PageTitle>
+
+<h1>Feature Flags</h1>
+<p class="muted">Lo que actives aquí aparece en la app MAUI al pulsar «Recargar flags».</p>
+
+@* Agregar un flag nuevo. @bind conecta el input con la variable nuevoNombre *@
+<div class="add-row">
+    <input @bind="nuevoNombre" @bind:event="oninput" placeholder="Nombre del flag" />
+    <button class="btn" @onclick="Agregar">Agregar</button>
+</div>
+
+@if (mensaje is not null)
+{
+    <p class="error">@mensaje</p>
+}
+
+<table class="flags">
+    <thead>
+        <tr><th>Nombre</th><th>IsEnabled</th><th></th></tr>
+    </thead>
+    <tbody>
+        @* Una fila por cada flag de la base de datos *@
+        @foreach (var f in flags)
+        {
+            <tr>
+                <td>@f.Name</td>
+                <td>
+                    @* Al cambiar el checkbox llamamos Cambiar() con el nuevo valor *@
+                    <label class="switch">
+                        <input type="checkbox" checked="@f.IsEnabled"
+                               @onchange="e => Cambiar(f, (bool)e.Value!)" />
+                        <span></span>
+                    </label>
+                    <code>@(f.IsEnabled ? "true" : "false")</code>
+                </td>
+                <td><button class="btn danger" @onclick="() => Borrar(f)">Borrar</button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code {
+    // Estado de la página
+    List<FeatureFlag> flags = new();   // los flags que se muestran en la tabla
+    string nuevoNombre = "";           // lo que escribes en el input
+    string? mensaje;                   // mensaje de error (si lo hay)
+
+    // Se ejecuta al abrir la página: lee todos los flags de flags.db
+    protected override async Task OnInitializedAsync()
+        => flags = await Db.FeatureFlags.OrderBy(f => f.Name).ToListAsync();
+
+    // Checkbox: cambia el valor y lo guarda AL INSTANTE en la base de datos.
+    // Esta es la línea que "controla" la app MAUI.
+    async Task Cambiar(FeatureFlag f, bool valor)
+    {
+        f.IsEnabled = valor;            // EF Core detecta el cambio...
+        await Db.SaveChangesAsync();    // ...y ejecuta el UPDATE en SQL
+    }
+
+    async Task Agregar()
+    {
+        mensaje = null;
+        var nombre = nuevoNombre.Trim();
+        if (nombre == "") return;
+
+        // Name es único en la BD: validamos antes para no provocar una excepción
+        if (flags.Any(x => x.Name.Equals(nombre, StringComparison.OrdinalIgnoreCase)))
+        {
+            mensaje = $"Ya existe un flag llamado «{nombre}».";
+            return;
+        }
+
+        var f = new FeatureFlag { Name = nombre, IsEnabled = false };  // nace apagado
+        Db.FeatureFlags.Add(f);         // INSERT
+        await Db.SaveChangesAsync();
+        flags.Add(f);                   // lo agregamos a la tabla en pantalla
+        nuevoNombre = "";
+    }
+
+    async Task Borrar(FeatureFlag f)
+    {
+        Db.FeatureFlags.Remove(f);      // DELETE
+        await Db.SaveChangesAsync();
+        flags.Remove(f);
+    }
+}
